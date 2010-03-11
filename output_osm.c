@@ -66,8 +66,15 @@ const char *xmlescape(const char *in)
         } else if (*in == '"') {
             strcpy(&escape_tmp[len], "&quot;");
             len += strlen("&quot;");
-        } else if ((*in >= 0) && (*in < 32)) {
+        } else if ((*in == 9) || (*in == 10) || (*in == 13)) {
             len+=sprintf(&escape_tmp[len], "&#%d;", *in);
+        } else if ((*in >= 0) && (*in < 32)) {
+           /* These characters are not valid in XML output
+            * http://www.w3.org/TR/REC-xml/#NT-Char
+            * (tab, newline, carriage return are handled above)
+            */
+            escape_tmp[len] = '?';
+            len++;
         } else {
             escape_tmp[len] = *in;
             len++;
