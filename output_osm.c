@@ -204,6 +204,9 @@ void osm_header() {
   printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
   printf("<osm version=\"0.6\" generator=\"OpenStreetMap planet.c\" "
 	 "timestamp=\"%s\">\n", timestamp);
+  printf("<!-- copyright=\"OpenStreetMap and contributors\" "
+	 "attribution=\"http://www.openstreetmap.org/copyright/\" "
+	 "license=\"http://creativecommons.org/licenses/by/2.0/\" -->\n");
   printf(INDENT "<bound box=\"-90,-180,90,180\" "
 	 "origin=\"http://www.openstreetmap.org/api/0.6\" />\n");
 }
