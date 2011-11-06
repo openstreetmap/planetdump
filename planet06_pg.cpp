@@ -146,8 +146,8 @@ protected:
 struct tag_stream 
   : public table_stream<int> {
 
-  tag_stream(pqxx::work &x, const char *table) 
-    : table_stream<int>(x, query(table), "fetch_tags") {
+   tag_stream(pqxx::work &x, const char *table, const char *type) 
+      : table_stream<int>(x, query(table, type), "fetch_tags") {
   }
 
   bool get(int id, struct keyval *kv) {
@@ -164,9 +164,9 @@ struct tag_stream
 
 private:
 
-  string query(const char *table) {
+  string query(const char *table, const char *type) {
     ostringstream ostr;
-    ostr << "select id, k, v from " << table << " order by id, k";
+    ostr << "select " << type << "_id, k, v from " << table << " order by " << type << "_id, k";
     return ostr.str();
   }
 };
@@ -179,8 +179,8 @@ struct way_node_stream
   : public table_stream<int> {
 
   way_node_stream(pqxx::work &x) 
-    : table_stream<int>(x, "select id, node_id from current_way_nodes "
-			"ORDER BY id, sequence_id", "fetch_way_nodes") {
+    : table_stream<int>(x, "select way_id, node_id from current_way_nodes "
+			"ORDER BY way_id, sequence_id", "fetch_way_nodes") {
   }
 
   bool get(int id, struct keyval *kv) {
@@ -204,9 +204,9 @@ struct relation_member_stream
   : public table_stream<int> {
 
   relation_member_stream(pqxx::work &x) 
-    : table_stream<int>(x, "select id, member_id, member_type, "
+    : table_stream<int>(x, "select relation_id, member_id, member_type, "
 			"member_role from current_relation_members "
-			"ORDER BY id, sequence_id", "fetch_relation_members") {
+			"ORDER BY relation_id, sequence_id", "fetch_relation_members") {
   }
 
   bool get(int id, struct keyval *members, struct keyval *roles) {
@@ -236,7 +236,7 @@ void changesets(pqxx::work &xaction) {
 	<< "from changesets c order by id";
 
   icursorstream changesets(xaction, query.str(), "fetch_changesets", 1000);
-  tag_stream tagstream(xaction, "changeset_tags");
+  tag_stream tagstream(xaction, "changeset_tags", "changeset");
 
   const icursor_iterator ic_end;
   for (icursor_iterator ic_itr(changesets); ic_itr != ic_end; ++ic_itr) {
@@ -284,7 +284,7 @@ void nodes(pqxx::work &xaction) {
 	<< "where n.visible = true order by n.id";
   
   icursorstream nodes(xaction, query.str(), "fetch_nodes", 1000);
-  tag_stream tagstream(xaction, "current_node_tags");
+  tag_stream tagstream(xaction, "current_node_tags", "node");
 
   const icursor_iterator ic_end;
   for (icursor_iterator ic_itr(nodes); ic_itr != ic_end; ++ic_itr) {
@@ -334,7 +334,7 @@ void ways(pqxx::work &xaction) {
 	<< "w.changeset_id=cs.id where visible = true order by id";
   
   icursorstream ways(xaction, query.str(), "fetch_ways", 1000);
-  tag_stream tagstream(xaction, "current_way_tags");
+  tag_stream tagstream(xaction, "current_way_tags", "way");
   way_node_stream nodestream(xaction);
 
   const icursor_iterator ic_end;
@@ -380,7 +380,7 @@ void relations(pqxx::work &xaction) {
 	<< "r.changeset_id=c.id where visible = true ORDER BY id";
   
   icursorstream relations(xaction, query.str(), "fetch_relations", 1000);
-  tag_stream tagstream(xaction, "current_relation_tags");
+  tag_stream tagstream(xaction, "current_relation_tags", "relation");
   relation_member_stream memstream(xaction);
 
   const icursor_iterator ic_end;
