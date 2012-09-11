@@ -206,7 +206,7 @@ void osm_header() {
 	 "timestamp=\"%s\">\n", timestamp);
   printf("<!-- copyright=\"OpenStreetMap and contributors\" "
 	 "attribution=\"http://www.openstreetmap.org/copyright/\" "
-	 "license=\"http://creativecommons.org/licenses/by-sa/2.0/\" -->\n");
+	 "license=\"http://opendatacommons.org/licenses/odbl/1.0/\" -->\n");
   printf(INDENT "<bound box=\"-90,-180,90,180\" "
 	 "origin=\"http://www.openstreetmap.org/api/0.6\" />\n");
 }
