@@ -232,7 +232,7 @@ void changesets(pqxx::work &xaction) {
 
   ostringstream query;
   query << "select id, user_id, created_at, closed_at, num_changes, "
-	<< "min_lat, max_lat, min_lon, max_lon, closed_at > now() as open "
+	<< "min_lat, max_lat, min_lon, max_lon, closed_at > now() at time zone 'utc' as open "
 	<< "from changesets c order by id";
 
   icursorstream changesets(xaction, query.str(), "fetch_changesets", 1000);
