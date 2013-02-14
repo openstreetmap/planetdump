@@ -1,9 +1,12 @@
-#include "output_osm.h"
 #include <string.h>
 #include <assert.h>
+#include <inttypes.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
+#include "output_osm.h"
 
 #define INDENT "  "
 
@@ -99,11 +102,11 @@ void osm_tags(struct keyval *tags)
    resetList(tags);
 }
 
-void osm_changeset(int id, const char *user, const char *created_at, const char *closed_at, 
+void osm_changeset(int64_t id, const char *user, const char *created_at, const char *closed_at, 
            int num_changes, int has_bbox, 
 		   long double min_lat, long double max_lat, long double min_lon, long double max_lon, 
 		   int open, struct keyval *tags) {
-  printf(INDENT "<changeset id=\"%d\" created_at=\"%s\" num_changes=\"%d\" ", id, created_at, num_changes);
+  printf(INDENT "<changeset id=\""PRId64"\" created_at=\"%s\" num_changes=\"%d\" ", id, created_at, num_changes);
   if (open) {
     printf("open=\"true\" ");
   } else {
@@ -123,10 +126,10 @@ void osm_changeset(int id, const char *user, const char *created_at, const char 
   }
 }
 
-void osm_node(int id, long double lat, long double lon, struct keyval *tags, const char *ts, const char *user, int version, int changeset)
+void osm_node(int64_t id, long double lat, long double lon, struct keyval *tags, const char *ts, const char *user, int version, int changeset)
 {
   if (listHasData(tags)) {
-    printf(INDENT "<node id=\"%d\" lat=\"%.7Lf\" lon=\"%.7Lf\" "
+    printf(INDENT "<node id=\""PRId64"\" lat=\"%.7Lf\" lon=\"%.7Lf\" "
 	   "timestamp=\"%s\" version=\"%d\" changeset=\"%d\"%s>\n", 
 	   id, lat, lon, ts, version, changeset, user);
     osm_tags(tags);
@@ -138,12 +141,12 @@ void osm_node(int id, long double lat, long double lon, struct keyval *tags, con
   }
 }
 
-void osm_way(int id, struct keyval *nodes, struct keyval *tags, const char *ts, const char *user, int version, int changeset)
+void osm_way(int64_t id, struct keyval *nodes, struct keyval *tags, const char *ts, const char *user, int version, int changeset)
 {
   struct keyval *p;
   
   if (listHasData(tags) || listHasData(nodes)) {
-    printf(INDENT "<way id=\"%d\" timestamp=\"%s\" version=\"%d\" changeset=\"%d\"%s>\n", id, ts, version, changeset, user);
+    printf(INDENT "<way id=\""PRId64"\" timestamp=\"%s\" version=\"%d\" changeset=\"%d\"%s>\n", id, ts, version, changeset, user);
     while ((p = popItem(nodes)) != NULL) {
       printf(INDENT INDENT "<nd ref=\"%s\" />\n", p->value);
       freeItem(p);
@@ -155,12 +158,12 @@ void osm_way(int id, struct keyval *nodes, struct keyval *tags, const char *ts, 
   }
 }
 
-void osm_relation(int id, struct keyval *members, struct keyval *roles, struct keyval *tags, const char *ts, const char *user, int version, int changeset)
+void osm_relation(int64_t id, struct keyval *members, struct keyval *roles, struct keyval *tags, const char *ts, const char *user, int version, int changeset)
 {
   struct keyval *p, *q;
   
   if (listHasData(tags) || listHasData(members)) {
-    printf(INDENT "<relation id=\"%d\" timestamp=\"%s\" version=\"%d\" changeset=\"%d\"%s>\n", id, ts, version, changeset, user);
+    printf(INDENT "<relation id=\""PRId64"\" timestamp=\"%s\" version=\"%d\" changeset=\"%d\"%s>\n", id, ts, version, changeset, user);
     while (((p = popItem(members)) != NULL) && ((q = popItem(roles)) != NULL)) {
       char *m_type = p->key;
       char *i; 

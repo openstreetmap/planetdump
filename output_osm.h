@@ -9,19 +9,19 @@
  */
 const char *xmlescape(const char *in);
 
-void osm_changeset(int id, const char *user, const char *created_at, const char *closed_at, 
+void osm_changeset(int64_t id, const char *user, const char *created_at, const char *closed_at, 
            int num_changes, int has_bbox, 
 		   long double min_lat, long double max_lat, long double min_lon, long double max_lon, 
 		   int open, struct keyval *tags);
 
-void osm_node(int id, 
+void osm_node(int64_t id, 
 	      long double lat, long double lon, 
 	      struct keyval *tags, const char *ts, 
 	      const char *user, int version, int changeset);
 
 /* nodes are "tags" of "" -> node id.
  */
-void osm_way(int id, 
+void osm_way(int64_t id, 
 	     struct keyval *nodes, 
 	     struct keyval *tags, const char *ts, 
 	     const char *user, int version, int changeset);
@@ -29,7 +29,7 @@ void osm_way(int id,
 /* members are "tags" of type -> id, roles are "tags" of "" -> role
  * in the same order as members.
  */
-void osm_relation(int id, 
+void osm_relation(int64_t id, 
 		  struct keyval *members, struct keyval *roles, 
 		  struct keyval *tags, const char *ts, 
 		  const char *user, int version, int changeset);

@@ -25,6 +25,7 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <cstdlib>
+#include <cstdint>
 
 #include "users.hpp"
 extern "C" {
@@ -144,13 +145,13 @@ protected:
  * tags out of the table.
  */
 struct tag_stream 
-  : public table_stream<int> {
+  : public table_stream<int64_t> {
 
    tag_stream(pqxx::work &x, const char *table, const char *type) 
-      : table_stream<int>(x, query(table, type), "fetch_tags") {
+      : table_stream<int64_t>(x, query(table, type), "fetch_tags") {
   }
 
-  bool get(int id, struct keyval *kv) {
+  bool get(int64_t id, struct keyval *kv) {
     bool has_tags = find_id(id);
     resetList(kv);
     if (has_tags) {
@@ -176,14 +177,14 @@ private:
  * keyval struct that the output functions are expecting.
  */
 struct way_node_stream 
-  : public table_stream<int> {
+  : public table_stream<int64_t> {
 
   way_node_stream(pqxx::work &x) 
-    : table_stream<int>(x, "select way_id, node_id from current_way_nodes "
-			"ORDER BY way_id, sequence_id", "fetch_way_nodes") {
+    : table_stream<int64_t>(x, "select way_id, node_id from current_way_nodes "
+			    "ORDER BY way_id, sequence_id", "fetch_way_nodes") {
   }
 
-  bool get(int id, struct keyval *kv) {
+  bool get(int64_t id, struct keyval *kv) {
     bool has_nodes = find_id(id);
     resetList(kv);
     if (has_nodes) {
@@ -201,15 +202,15 @@ struct way_node_stream
  * pair of keyval structs that the output functions are expecting.
  */
 struct relation_member_stream 
-  : public table_stream<int> {
+  : public table_stream<int64_t> {
 
   relation_member_stream(pqxx::work &x) 
-    : table_stream<int>(x, "select relation_id, member_id, member_type, "
-			"member_role from current_relation_members "
-			"ORDER BY relation_id, sequence_id", "fetch_relation_members") {
+    : table_stream<int64_t>(x, "select relation_id, member_id, member_type, "
+			    "member_role from current_relation_members "
+			    "ORDER BY relation_id, sequence_id", "fetch_relation_members") {
   }
 
-  bool get(int id, struct keyval *members, struct keyval *roles) {
+  bool get(int64_t id, struct keyval *members, struct keyval *roles) {
     bool has_members = find_id(id);
     resetList(members);
     resetList(roles);
@@ -244,7 +245,7 @@ void changesets(pqxx::work &xaction) {
     for (pqxx::result::const_iterator itr = res.begin();
 	 itr != res.end(); ++itr) {
       const pqxx::result::tuple &row = *itr;
-      const int id = row[0].as<int>();
+      const int64_t id = row[0].as<int64_t>();
       const int num_changes = row[4].as<int>();
       const bool null_bbox = row[5].is_null() || row[6].is_null() || row[7].is_null() || row[8].is_null();
 
@@ -291,9 +292,10 @@ void nodes(pqxx::work &xaction) {
     const pqxx::result &res = *ic_itr;
     for (pqxx::result::const_iterator itr = res.begin();
 	 itr != res.end(); ++itr) {
-      int id, version, latitude, longitude, changeset;
+      int64_t id;
+      int version, latitude, longitude, changeset;
 
-      if (!(*itr)[0].to<int>(id)) {
+      if (!(*itr)[0].to<int64_t>(id)) {
 	throw std::runtime_error("Node ID is not numeric.");
       }
       if (!(*itr)[1].to<int>(latitude)) {
@@ -342,9 +344,10 @@ void ways(pqxx::work &xaction) {
     const pqxx::result &res = *ic_itr;
     for (pqxx::result::const_iterator itr = res.begin();
 	 itr != res.end(); ++itr) {
-      int id, version, changeset;
+      int64_t id;
+      int version, changeset;
 
-      if (!(*itr)[0].to<int>(id)) {
+      if (!(*itr)[0].to<int64_t>(id)) {
 	throw std::runtime_error("Node ID is not numeric.");
       }
       if (!(*itr)[3].to<int>(version)) {
@@ -388,9 +391,10 @@ void relations(pqxx::work &xaction) {
     const pqxx::result &res = *ic_itr;
     for (pqxx::result::const_iterator itr = res.begin();
 	 itr != res.end(); ++itr) {
-      int id, version, changeset;
+      int64_t id;
+      int version, changeset;
 
-      if (!(*itr)[0].to<int>(id)) {
+      if (!(*itr)[0].to<int64_t>(id)) {
 	throw std::runtime_error("Relation ID is not numeric.");
       }
       if (!(*itr)[3].to<int>(version)) {
