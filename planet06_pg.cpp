@@ -42,7 +42,6 @@ const char *reformDate(const char *str)
 {
     static char out[64], prev[64]; // Not thread safe
 
-    time_t tmp;
     struct tm tm;
 
     // Re-use the previous answer if we asked to convert the same timestamp twice
@@ -246,7 +245,6 @@ void changesets(pqxx::work &xaction) {
 	 itr != res.end(); ++itr) {
       const pqxx::result::tuple &row = *itr;
       const int64_t id = row[0].as<int64_t>();
-      const int num_changes = row[4].as<int>();
       const bool null_bbox = row[5].is_null() || row[6].is_null() || row[7].is_null() || row[8].is_null();
 
       if (!tagstream.get(id, &tags)) {
@@ -260,7 +258,7 @@ void changesets(pqxx::work &xaction) {
 		    lookup_user(row[1].c_str()), // user_id
 		    created_at, // created_at
 		    reformDate(row[3].c_str()), // closed_at
-            row[4].as<int>(), // num_changes
+		    row[4].as<int>(), // num_changes
 		    null_bbox ? 0 : 1,
 		    null_bbox ? 0 : row[5].as<int>() / SCALE, // min_lat
 		    null_bbox ? 0 : row[6].as<int>() / SCALE, // max_lat

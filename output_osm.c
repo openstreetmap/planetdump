@@ -1,5 +1,6 @@
 #include <string.h>
 #include <assert.h>
+#include <ctype.h>
 #include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -135,7 +136,7 @@ void osm_node(int64_t id, long double lat, long double lon, struct keyval *tags,
     osm_tags(tags);
     printf(INDENT "</node>\n");
   } else {
-    printf(INDENT "<node id=\"%d\" lat=\"%.7Lf\" lon=\"%.7Lf\" "
+    printf(INDENT "<node id=\"%"PRId64"\" lat=\"%.7Lf\" lon=\"%.7Lf\" "
 	   "timestamp=\"%s\" version=\"%d\" changeset=\"%d\"%s/>\n", 
 	   id, lat, lon, ts, version, changeset, user);
   }
@@ -154,7 +155,7 @@ void osm_way(int64_t id, struct keyval *nodes, struct keyval *tags, const char *
     osm_tags(tags);
     printf(INDENT "</way>\n");
   } else {
-    printf(INDENT "<way id=\"%d\" timestamp=\"%s\" version=\"%d\" changeset=\"%d\"%s/>\n", id, ts, version, changeset, user);
+    printf(INDENT "<way id=\"%"PRId64"\" timestamp=\"%s\" version=\"%d\" changeset=\"%d\"%s/>\n", id, ts, version, changeset, user);
   }
 }
 
@@ -177,7 +178,7 @@ void osm_relation(int64_t id, struct keyval *members, struct keyval *roles, stru
     osm_tags(tags);
     printf(INDENT "</relation>\n");
   } else {
-    printf(INDENT "<relation id=\"%d\" timestamp=\"%s\" version=\"%d\" changeset=\"%d\"%s/>\n", id, ts, version, changeset, user);
+    printf(INDENT "<relation id=\"%"PRId64"\" timestamp=\"%s\" version=\"%d\" changeset=\"%d\"%s/>\n", id, ts, version, changeset, user);
   }
 }
 

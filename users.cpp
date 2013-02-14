@@ -78,7 +78,7 @@ void fetch_users(pqxx::work &xaction)
 }
 
 void free_users(void) {
-  for(int i=0; i<=max_uid; i++)
+  for(unsigned long i=0; i<=max_uid; i++)
     free(user_list[i]);
   free(user_list);
 }
