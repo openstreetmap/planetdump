@@ -26,4 +26,4 @@ planet06_pg: planet06_pg.o users.o keyvals.o output_osm.o
 	$(CXX) -o $@ $^ $(PGSQL_LDFLAGS)
 
 %.o: %.cpp
-	$(CXX) $(PGSQL_CFLAGS) -std=c++11 -o $@ -c $<
+	$(CXX) $(PGSQL_CFLAGS) -std=c++0x -o $@ -c $<
