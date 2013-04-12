@@ -459,7 +459,7 @@ int main(int argc, char **argv)
     // open database connection
     pqxx::connection conn(connection_params);
     pqxx::work xaction(conn);
-    xaction.exec("set transaction isolation level serializable read only");
+    xaction.exec("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY");
 
     fetch_users(xaction);
 
