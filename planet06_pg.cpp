@@ -174,7 +174,7 @@ private:
 
   string query(const char *table, const char *type) {
     ostringstream ostr;
-    ostr << "select " << type << "_id, k, v from " << table << " order by " << type << "_id, k";
+    ostr << "select " << type << "_id, k, v from " << table << " order by " << type << "_id";
     return ostr.str();
   }
 };
