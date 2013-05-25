@@ -129,8 +129,16 @@ protected:
 
     // get the next ID unless the end of the table has been hit
     if (next_id < std::numeric_limits<id_type>::max()) {
+      const id_type cur_id = next_id;
       if (!(*r_itr)[0].to<id_type>(next_id)) {
 	throw std::runtime_error("Next ID is non-numeric.");
+      }
+      if (next_id < cur_id) {
+         ostringstream err;
+         err << "Postgres has given us a 'next' ID " << next_id 
+             << " which is less than the current ID " << cur_id
+             << ", either Postgres has failed, or there's a bug.";
+         throw std::runtime_error(err.str());
       }
     }
   }
@@ -166,7 +174,7 @@ private:
 
   string query(const char *table, const char *type) {
     ostringstream ostr;
-    ostr << "select " << type << "_id, k, v from " << table << " order by " << type << "_id, k";
+    ostr << "select " << type << "_id, k, v from " << table << " order by " << type << "_id";
     return ostr.str();
   }
 };
@@ -239,12 +247,23 @@ void changesets(pqxx::work &xaction) {
   tag_stream tagstream(xaction, "changeset_tags", "changeset");
 
   const icursor_iterator ic_end;
+  int64_t prev_id = -1;
   for (icursor_iterator ic_itr(changesets); ic_itr != ic_end; ++ic_itr) {
     const pqxx::result &res = *ic_itr;
     for (pqxx::result::const_iterator itr = res.begin();
 	 itr != res.end(); ++itr) {
       const pqxx::result::tuple &row = *itr;
       const int64_t id = row[0].as<int64_t>();
+
+      if (id <= prev_id) {
+         ostringstream err;
+         err << "Postgres gave us changeset " << id << " after changeset "
+             << prev_id << ", which isn't ordered. This is a bug, either "
+             << "in Postgres or in planet dump.";
+         throw std::runtime_error(err.str());
+      }
+      prev_id = id;
+
       const bool null_bbox = row[5].is_null() || row[6].is_null() || row[7].is_null() || row[8].is_null();
 
       if (!tagstream.get(id, &tags)) {
@@ -286,6 +305,7 @@ void nodes(pqxx::work &xaction) {
   tag_stream tagstream(xaction, "current_node_tags", "node");
 
   const icursor_iterator ic_end;
+  int64_t prev_id = -1;
   for (icursor_iterator ic_itr(nodes); ic_itr != ic_end; ++ic_itr) {
     const pqxx::result &res = *ic_itr;
     for (pqxx::result::const_iterator itr = res.begin();
@@ -308,6 +328,15 @@ void nodes(pqxx::work &xaction) {
       if (!(*itr)[6].to<int>(changeset)) {
 	throw std::runtime_error("Changeset ID is not numeric.");
       }
+
+      if (id <= prev_id) {
+         ostringstream err;
+         err << "Postgres gave us node " << id << " after node "
+             << prev_id << ", which isn't ordered. This is a bug, either "
+             << "in Postgres or in planet dump.";
+         throw std::runtime_error(err.str());
+      }
+      prev_id = id;
 
       if (!tagstream.get(id, &tags)) {
 	resetList(&tags);
@@ -338,6 +367,7 @@ void ways(pqxx::work &xaction) {
   way_node_stream nodestream(xaction);
 
   const icursor_iterator ic_end;
+  int64_t prev_id = -1;
   for (icursor_iterator ic_itr(ways); ic_itr != ic_end; ++ic_itr) {
     const pqxx::result &res = *ic_itr;
     for (pqxx::result::const_iterator itr = res.begin();
@@ -354,6 +384,15 @@ void ways(pqxx::work &xaction) {
       if (!(*itr)[4].to<int>(changeset)) {
 	throw std::runtime_error("Changeset ID is not numeric.");
       }
+
+      if (id <= prev_id) {
+         ostringstream err;
+         err << "Postgres gave us way " << id << " after way "
+             << prev_id << ", which isn't ordered. This is a bug, either "
+             << "in Postgres or in planet dump.";
+         throw std::runtime_error(err.str());
+      }
+      prev_id = id;
 
       tagstream.get(id, &tags);
       nodestream.get(id, &nodes);
@@ -385,6 +424,7 @@ void relations(pqxx::work &xaction) {
   relation_member_stream memstream(xaction);
 
   const icursor_iterator ic_end;
+  int64_t prev_id = -1;
   for (icursor_iterator ic_itr(relations); ic_itr != ic_end; ++ic_itr) {
     const pqxx::result &res = *ic_itr;
     for (pqxx::result::const_iterator itr = res.begin();
@@ -401,6 +441,15 @@ void relations(pqxx::work &xaction) {
       if (!(*itr)[4].to<int>(changeset)) {
 	throw std::runtime_error("Changeset ID is not numeric.");
       }
+
+      if (id <= prev_id) {
+         ostringstream err;
+         err << "Postgres gave us relation " << id << " after relation "
+             << prev_id << ", which isn't ordered. This is a bug, either "
+             << "in Postgres or in planet dump.";
+         throw std::runtime_error(err.str());
+      }
+      prev_id = id;
 
       tagstream.get(id, &tags);
       memstream.get(id, &members, &roles);
