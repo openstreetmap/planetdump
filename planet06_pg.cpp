@@ -472,9 +472,7 @@ int main(int argc, char **argv)
   int want_nodes, want_ways, want_relations, want_changesets;
     
   if (argc == 1)
-    // note: changesets not enabled by default, yet. client software will need
-    // time to prepare. suggestion is to have them as a separate download.
-    want_nodes = want_ways = want_relations = 1;
+    want_nodes = want_ways = want_relations = want_changesets = 1;
   else {
     want_nodes = want_ways = want_relations = want_changesets = 0;
     for(i=1; i<argc; i++) {
