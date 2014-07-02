@@ -487,8 +487,8 @@ int main(int argc, char **argv)
       else {
 	fprintf(stderr, "Usage error:\n");
 	fprintf(stderr, "\t%s [--nodes] [--ways] [--relations] [--changesets]\n\n", argv[0]);
-	fprintf(stderr, "Writes OSM planet dump to STDOUT. If no flags are specified then nodes, ways and\n");
-	fprintf(stderr, "relations are output. If one or more flags are set then only the requested data\n");
+	fprintf(stderr, "Writes OSM planet dump to STDOUT. If no flags are specified then nodes, ways, relations,\n");
+	fprintf(stderr, "and changesets are output. If one or more flags are set then only the requested data\n");
 	fprintf(stderr, "is dumped.\n");
 	exit(2);
       }
